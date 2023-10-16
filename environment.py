@@ -27,12 +27,20 @@ class VacuumWorldEnv(gym.Env):
         self._generate_map()
                 
 
-    def _generate_map(self):
+    def _generate_map(self, is_obstacle=False):
         for i in range(self.n_rows):
+            blocks = 0
             for j in range(self.n_cols):
                 epsilon = random.random()
-                if epsilon > 0.5:
-                    self.map[i][j] = 1
+                if is_obstacle:
+                    if epsilon > 2/3:
+                        self.map[i][j] = 1
+                    elif epsilon < 1/3 and blocks < self.n_cols:
+                        self.map[i][j] = -1
+                        blocks += 1 
+                else:
+                    if epsilon > 0.5:
+                        self.map[i][j] = 1
 
     def _get_obs(self) -> tuple:
         return (self.pos_x, self.pos_y, self.map[self.pos_x][self.pos_y])

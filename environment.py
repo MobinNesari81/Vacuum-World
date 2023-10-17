@@ -43,7 +43,7 @@ class VacuumWorldEnv(gym.Env):
                     if epsilon > 1-dirt_chance:
                         self.map[i][j] = 1
                     elif epsilon < obstacle_chance and blocks < self.n_cols:
-                        self.map[i][j] = -1
+                        self.map[i][j] = -1 if (i != 0 or j != 0) else self.map[i][j]
                         blocks += 1
                 else:
                     if epsilon > 1-dirt_chance:

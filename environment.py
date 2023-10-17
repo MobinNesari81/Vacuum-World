@@ -31,7 +31,7 @@ class VacuumWorldEnv(gym.Env):
         self.suck_uncertainity = suck_uncertainity
         self.observation_uncertainity = observation_uncertainity
 
-        self._generate_map(dirt_chance=self.dirt_chance, is_obstacle=False, obstacle_chance=obstacle_chance)
+        self._generate_map(dirt_chance=self.dirt_chance, is_obstacle=is_obstacle, obstacle_chance=obstacle_chance)
                 
 
     def _generate_map(self, dirt_chance: float = 0.5, is_obstacle=False, obstacle_chance: float = None):
@@ -101,6 +101,10 @@ class VacuumWorldEnv(gym.Env):
                     self.pos_y = tmp_pos[1]
                 else:
                     pass
+            else:
+                self.pos_x = tmp_pos[0]
+                self.pos_y = tmp_pos[1]
+
         
         if action == 5:
             if self.suck_uncertainity:

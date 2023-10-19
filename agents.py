@@ -6,7 +6,7 @@
 '''
 import random
 
-class reflexive_agent_2rooms:
+class Reflexive_Agent_2Rooms:
     def __init__(self) -> None:
         pass
         '''
@@ -27,7 +27,7 @@ class reflexive_agent_2rooms:
                 return 2
         
 
-class random_reflexive_agent:
+class Random_Reflexive_Agent:
     def __init__(self) -> None:
         pass
         '''
@@ -48,7 +48,7 @@ class random_reflexive_agent:
             return action 
 
 
-class no_location_agent:
+class No_Location_Agent:
     def __init__(self, env):
         self.model = [[1 for j in range(env.n_cols)] for i in range(env.n_rows)] 
         self.cols = env.n_cols 

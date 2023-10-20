@@ -205,3 +205,81 @@ class TraGent:
                 elif delta_y < 0:
                     print('right')
                     return 1
+
+
+
+from collections import deque
+
+class No_Location_Agent:
+    def __init__(self, env): 
+        self.model = [[-1 for j in range(env.n_cols)] for i in range(env.n_rows)]
+        self.current_state = (0,0)
+        self.actions = [(0, 1), (0, -1), (-1, 0), (1, 0)]  # right, left, up, down
+        self.path = []
+        self.cleaned = False 
+        self.no_op = True
+
+        '''
+            0 -> No_Op
+            1 -> Right
+            2 -> Left
+            3 -> Up
+            4 -> Down
+            5 -> Suck
+        '''
+    def bfs(self, matrix, start):
+        rows, cols = len(matrix), len(matrix[0])
+        queue = deque([start])
+        visited = set([start])
+        directions = self.actions 
+        path = {start: []}
+
+        while queue:
+            cell = queue.popleft()
+            for direction in directions:
+                new_row, new_col = cell[0] + direction[0], cell[1] + direction[1]
+                new_cell = (new_row, new_col)
+                if (0 <= new_row < rows and 0 <= new_col < cols and
+                    matrix[new_row][new_col] != 1 and
+                    new_cell not in visited):
+                    queue.append(new_cell)
+                    visited.add(new_cell)
+                    path[new_cell] = path[cell] + [new_cell]
+                    if matrix[new_row][new_col] == -1:
+                        return path[new_cell], False 
+        return [], True
+
+    def act(self, obs, terminated):
+        if terminated:
+            return 0 
+
+        if (obs[0], obs[1]) == self.current_state and self.cleaned == False and self.no_op == False: 
+            i, j = self.path[-1]
+            self.model[i][j] = 1  
+            self.path = []
+
+        elif self.no_op == False:
+            self.current_state = self.path[0]
+            self.path = self.path if len(self.path) > 1 else []
+        
+        if len(self.path) == 0:
+            if obs[2] == 1: 
+                self.cleaned = True
+                self.no_op = True 
+                return 5
+            self.model[self.current_state[0]][self.current_state[1]] = 0 
+            self.path, terminated = self.bfs(self.model, self.current_state)
+            self.path = [self.current_state] + self.path 
+            self.no_op = True
+            return 0 
+
+        else:
+            start, end = self.path[0], self.path[1]
+            dir = (end[0] - start[0], end[1] - start[1])
+            action = self.actions.index(dir) + 1 
+            self.cleaned = False
+            self.no_op = False
+            self.path = self.path[1:]
+
+            return action 
+            

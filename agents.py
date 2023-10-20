@@ -48,7 +48,7 @@ class Random_Reflexive_Agent:
             return action 
 
 
-class No_Location_Agent:
+class Faulty_Sensor_Agent:
     def __init__(self, env):
         self.model = [[1 for j in range(env.n_cols)] for i in range(env.n_rows)] 
         self.cols = env.n_cols 

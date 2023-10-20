@@ -31,22 +31,22 @@ class VacuumWorldEnv(gym.Env):
         self.suck_uncertainity = suck_uncertainity
         self.observation_uncertainity = observation_uncertainity
 
-        self._generate_map(dirt_chance=self.dirt_chance, is_obstacle=is_obstacle, obstacle_chance=obstacle_chance)
+        self._generate_map()
                 
 
-    def _generate_map(self, dirt_chance: float = 0.5, is_obstacle=False, obstacle_chance: float = None):
+    def _generate_map(self):
         for i in range(self.n_rows):
             blocks = 0
             for j in range(self.n_cols):
                 epsilon = random.random()
-                if is_obstacle:
-                    if epsilon > 1-dirt_chance:
+                if self.is_obstacle:
+                    if epsilon > 1-self.dirt_chance:
                         self.map[i][j] = 1
-                    elif epsilon < obstacle_chance and blocks < self.n_cols:
+                    elif epsilon < self.obstacle_chance and blocks < self.n_cols:
                         self.map[i][j] = -1 if (i != 0 or j != 0) else self.map[i][j]
                         blocks += 1
                 else:
-                    if epsilon > 1-dirt_chance:
+                    if epsilon > 1-self.dirt_chance:
                         self.map[i][j] = 1
 
     def _get_obs(self) -> tuple:

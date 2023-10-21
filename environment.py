@@ -4,11 +4,15 @@ import pygame
 import random
 
 class VacuumWorldEnv(gym.Env):
-    def __init__(self, n_rows:int = 5, n_cols:int = 5, max_timestep=100, dirt_chance:float = 0.4, is_obstacle:bool = False, obstacle_chance: float = 0.3, dirt_uncertainnity: bool = False, movement_uncertainity: bool = False, suck_uncertainity: bool = False, observation_uncertainity: bool = False) -> None:
+    def __init__(self, n_rows:int = 5, n_cols:int = 5, max_timestep=100, dirt_chance:float = 0.4, is_obstacle:bool = False, obstacle_chance: float = 0.3, dirt_uncertainity: bool = False, movement_uncertainity: bool = False, suck_uncertainity: bool = False, observation_uncertainity: bool = False, no_location_obs: bool = False) -> None:
         self.n_rows = n_rows
         self.n_cols = n_cols
         self.MAX_STEP = max_timestep
-        self.observation_space = spaces.Tuple((spaces.Discrete(self.n_rows), spaces.Discrete(self.n_cols), spaces.Discrete(2))) # pos_x, pos_y, is_dirty
+        self.no_location_obs = no_location_obs
+        if self.no_location_obs:
+            self.observation_space = spaces.Tuple((spaces.Discrete(2), spaces.Discrete(2)))
+        else:
+            self.observation_space = spaces.Tuple((spaces.Discrete(self.n_rows), spaces.Discrete(self.n_cols), spaces.Discrete(2))) # pos_x, pos_y, is_dirty
         self.action_space = spaces.Discrete(6)
         '''
             0 -> No_Op
@@ -22,11 +26,13 @@ class VacuumWorldEnv(gym.Env):
         self.map = [[0 for j in range(self.n_cols)] for i in range(self.n_rows)]
         self.pos_x = 0
         self.pos_y = 0
+        self.prev_x_pos = None
+        self.prev_y_pos = None
         self.time_step = 1
         self.dirt_chance = dirt_chance
         self.is_obstacle = is_obstacle
         self.obstacle_chance = obstacle_chance
-        self.dirt_uncertainity = dirt_uncertainnity
+        self.dirt_uncertainity = dirt_uncertainity
         self.movement_uncertainity = movement_uncertainity
         self.suck_uncertainity = suck_uncertainity
         self.observation_uncertainity = observation_uncertainity
@@ -50,7 +56,16 @@ class VacuumWorldEnv(gym.Env):
                         self.map[i][j] = 1
 
     def _get_obs(self) -> tuple:
-        return (self.pos_x, self.pos_y, self.map[self.pos_x][self.pos_y])
+        if not self.no_location_obs:
+            return (self.pos_x, self.pos_y, self.map[self.pos_x][self.pos_y])
+        else:
+            if self.prev_x_pos and self.prev_x_pos:
+                if self.prev_x_pos == self.pos_x and self.prev_y_pos == self.pos_y:
+                    return (1, self.map[self.pos_x][self.pos_y])
+                else:
+                    return (0, self.map[self.pos_x][self.pos_y])
+            else:
+                return (0, self.map[self.pos_x][self.pos_y])
 
     def _get_info(self) -> dict:
         return {'time_step': self.time_step}
@@ -68,6 +83,8 @@ class VacuumWorldEnv(gym.Env):
         self._generate_map()
         self.pos_x = 0
         self.pos_y = 0
+        self.prev_x_pos = None
+        self.prev_y_pos = None
         self.time_step = 1
 
         return self._get_obs(), self._get_info()
@@ -97,11 +114,15 @@ class VacuumWorldEnv(gym.Env):
             if self.movement_uncertainity:
                 epsilon = random.random()
                 if epsilon > 0.2:
+                    self.prev_x_pos = self.pos_x
+                    self.prev_y_pos = self.pos_y
                     self.pos_x = tmp_pos[0]
                     self.pos_y = tmp_pos[1]
                 else:
                     pass
             else:
+                self.prev_x_pos = self.pos_x
+                self.prev_y_pos = self.pos_y
                 self.pos_x = tmp_pos[0]
                 self.pos_y = tmp_pos[1]
 
@@ -126,12 +147,20 @@ class VacuumWorldEnv(gym.Env):
             self._dirt_process()
         
         obs = self._get_obs()
-        if self.observation_uncertainity:
-            epsilon = random.random()
-            if epsilon > 0.1:
-                pass
-            else:
-                obs = (obs[0], obs[1], 1-obs[2])
+        if not self.no_location_obs:
+            if self.observation_uncertainity:
+                epsilon = random.random()
+                if epsilon > 0.1:
+                    pass
+                else:
+                    obs = (obs[0], obs[1], 1-obs[2])
+        else:
+            if self.observation_uncertainity:
+                epsilon = random.random()
+                if epsilon > 0.1:
+                    pass
+                else:
+                    obs = (obs[0], 1-obs[2])
                 
         return obs, reward, False, self._get_info()
 

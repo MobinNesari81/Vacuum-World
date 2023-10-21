@@ -194,16 +194,16 @@ class TraGent:
                 if len(self.destination) == 1:
                     self.destination = None
                 if delta_x > 0:
-                    print('up')
+                    #print('up')
                     return 3
                 elif delta_x < 0:
-                    print('down')
+                    #print('down')
                     return 4
                 elif delta_y > 0:
-                    print('left')
+                    #print('left')
                     return 2
                 elif delta_y < 0:
-                    print('right')
+                    #print('right')
                     return 1
 
 

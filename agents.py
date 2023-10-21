@@ -276,6 +276,17 @@ class No_Location_Agent:
             self.path = [self.current_state] + self.path 
             self.no_op = True
             return 0 
+        if len(self.path) == 1:
+            if obs[2] == 1: 
+                self.cleaned = True
+                self.no_op = True 
+                return 5
+            self.current_state = self.path.pop()
+            self.model[self.current_state[0]][self.current_state[1]] = 0 
+            self.path, terminated = self.bfs(self.model, self.current_state)
+            self.path = [self.current_state] + self.path 
+            self.no_op = True
+            return 0 
 
         else:
             start, end = self.path[0], self.path[1]

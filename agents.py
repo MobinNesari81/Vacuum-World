@@ -100,12 +100,13 @@ class Faulty_Sensor_Agent:
 
 class TraGent:
     # Trace Agent implementation
-    def __init__(self) -> None:
+    def __init__(self, do_back_trace: bool = True) -> None:
         self.memory_stack = []
         self.destination = None
         self.stal_flag = False
         self.prev_action = None
         self.last_row_direction = None
+        self.do_back_trace = do_back_trace
 
     def act(self, observation: tuple, terminated: bool):
         if terminated:
@@ -185,7 +186,7 @@ class TraGent:
                 
                 
             
-            else:
+            elif self.do_back_trace:
                 # Trace last to start
                 if self.destination[0] == (observation[0], observation[1]):
                     self.destination.pop(0)
@@ -205,6 +206,9 @@ class TraGent:
                 elif delta_y < 0:
                     #print('right')
                     return 1
+            
+            else:
+                return 0
 
 
 
